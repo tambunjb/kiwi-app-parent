@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "566699596355",
+    "project_id": "kiwi-app-parent",
+    "storage_bucket": "kiwi-app-parent.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:566699596355:android:319c59268329728ae852f6",
+        "android_client_info": {
+          "package_name": "kiwi.app.daycare.kiwi_app_parent"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "566699596355-54t32if94jsogoe32sjsht85f654o770.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kiwi.app.daycare.kiwi_app_parent",
+            "certificate_hash": "ca93b9bb2cc6b45ff4d1286e0f38193646c47b23"
+          }
+        },
+        {
+          "client_id": "566699596355-rsf67celq7t7pkm1lv4anuu4piem8bar.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0wl0shqzbFqdCWQAdJVJwd03p_IrLSmQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "566699596355-rsf67celq7t7pkm1lv4anuu4piem8bar.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
