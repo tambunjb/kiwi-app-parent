@@ -22,7 +22,7 @@ class _DetailCardState extends State<DetailCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 10, right: 5, left: 5),
+      margin: const EdgeInsets.only(bottom: 10, right: 10, left: 10),
       elevation: 0,
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: Colors.black12, width: 1),

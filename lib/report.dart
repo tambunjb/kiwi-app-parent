@@ -138,7 +138,7 @@ class _ReportState extends State<Report> with WidgetsBindingObserver {
     if(index != -1) {
       NavigationService.instance.navigateToRoute(MaterialPageRoute(
           builder: (BuildContext context){
-            return ReportDetail(data: _d[index], milks: _d[index]['report']['milk_sessions'], thingsList: listThings, mealsList: listMeals, napList: listNap);
+            return ReportDetail(data: _d[index], milks: _d[index]['report']['milk_sessions'], rating: _d[index]['report']['ratings'], thingsList: listThings, mealsList: listMeals, napList: listNap, updateReport: _updateReport);
           })
       );
     }
@@ -149,6 +149,12 @@ class _ReportState extends State<Report> with WidgetsBindingObserver {
     _data = _buildReportList();
 
     super.didChangeDependencies();
+  }
+
+  void _updateReport() {
+    setState(() {
+      _data = _buildReportList();
+    });
   }
 
   Future<void> _checkVersionUpdate() async {
@@ -397,7 +403,7 @@ class _ReportState extends State<Report> with WidgetsBindingObserver {
                           onTap: () {
                             NavigationService.instance.navigateToRoute(MaterialPageRoute(
                                 builder: (BuildContext context){
-                                  return ReportDetail(data: data[index], milks: data[index]['report']['milk_sessions'], thingsList: listThings, mealsList: listMeals, napList: listNap);
+                                  return ReportDetail(data: data[index], milks: data[index]['report']['milk_sessions'], rating: data[index]['report']['ratings'], thingsList: listThings, mealsList: listMeals, napList: listNap, updateReport: _updateReport);
                                 }
                             ));
                           },

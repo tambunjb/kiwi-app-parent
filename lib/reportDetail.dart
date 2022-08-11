@@ -1,22 +1,26 @@
 import 'dart:convert';
 
-import 'package:intl/intl.dart' show DateFormat, toBeginningOfSentenceCase;
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter/material.dart';
 import 'package:kiwi_app_parent/reportPdfPreview.dart';
 
+import 'api.dart';
 import 'config.dart';
 import 'navigationService.dart';
 import 'detailCard.dart';
+import 'rating.dart';
 
 
 class ReportDetail extends StatefulWidget{
   final dynamic data;
   dynamic milks;
+  dynamic rating;
   List<String> thingsList;
   List<String> mealsList;
   List<String> napList;
+  Function updateReport;
 
-  ReportDetail({Key? key, required this.data, required this.milks, required this.thingsList, required this.mealsList, required this.napList}) : super(key: key) {
+  ReportDetail({Key? key, required this.data, required this.milks, required this.rating, required this.thingsList, required this.mealsList, required this.napList, required this.updateReport}) : super(key: key) {
     if(milks != null && milks.runtimeType == String) {
       milks = milks.replaceAll('null', '||||');
       milks = milks.replaceAll('{', '{"');
@@ -38,6 +42,22 @@ class ReportDetail extends StatefulWidget{
         }
       }
     }
+
+    if(rating != null && rating.runtimeType == String) {
+      rating = rating.replaceAll('null', '||||');
+      rating = rating.replaceAll('{', '{"');
+      rating = rating.replaceAll(': ', '": "');
+      rating = rating.replaceAll(', ', '", "');
+      rating = rating.replaceAll('}', '"}');
+      rating = rating.replaceAll('}",', '},');
+      rating = rating.replaceAll(', "{', ', {');
+      rating = rating.replaceAll('"||||"', 'null');
+      rating = jsonDecode(rating);
+
+      if(rating.length > 0) {
+        rating = rating[0];
+      }
+    }
   }
 
   @override
@@ -45,12 +65,31 @@ class ReportDetail extends StatefulWidget{
 }
 
 class _ReportDetailState extends State<ReportDetail> {
+  // int starTapped = 0;
+  bool isSubmit = false;
+  String ratingId = '0';
 
   @override
   void initState() {
     Config().eventDetail(widget.data['id']);
 
+    if(widget.rating!=null && widget.rating.isNotEmpty && widget.rating['id']!=null) {
+      ratingId = widget.rating['id'];
+    }
+
     super.initState();
+  }
+
+  void _setRatingId(String newRatingId) {
+    setState(() {
+      ratingId = newRatingId;
+    });
+  }
+
+  void _setRatingSubmitted() {
+    setState(() {
+      isSubmit = true;
+    });
   }
 
   List<Widget> listThings() {
@@ -318,7 +357,7 @@ class _ReportDetailState extends State<ReportDetail> {
             ),
             backgroundColor: Colors.white,
             body: ListView(
-                padding: const EdgeInsets.only(left: 5, right: 5),
+                //padding: const EdgeInsets.only(left: 5, right: 5),
                 children: [
                   const Padding(padding: EdgeInsets.only(top:10, bottom:10, left: 15), child: Text('Important for tomorrow', style: TextStyle(fontSize: 24))),
                   DetailCard(title:"Things to bring tomorrow", leadIcon: const Icon(Icons.alarm, size: 30),
@@ -422,8 +461,60 @@ class _ReportDetailState extends State<ReportDetail> {
                           child: Text(medProcess(), style: const TextStyle(fontSize: 16))
                       )])
                   ),
+                  widget.data['report']['is_submit_rating']=='1' || isSubmit ?Container():
+                  GestureDetector(
+                    onTap: () {
+                      NavigationService.instance.navigateToRoute(MaterialPageRoute(
+                        builder: (BuildContext context){
+                          return Rating(rating_id: ratingId, report_id: widget.data['report']['id'], date: widget.data['report']['date'], nickname: widget.data['report']['nickname'], updateReport: widget.updateReport, setRatingSubmitted: _setRatingSubmitted, setRatingId: _setRatingId);
+                        }),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                      color: const Color(0xFFf7e2a3),
+                      child: Column(
+                        children: [
+                          const Text('Klik di sini untuk memberi masukan Anda', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 5),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: getStars()
+                          )
+                        ],
+                      )
+                    )
+                  )
                 ]
             )
         );
+  }
+
+  List<Widget> getStars() {
+    List<Widget> stars = [];
+    for(int i=1;i<=5;i++) {
+      stars.add(GestureDetector(
+        onTap: () {
+          // setState(() {
+          //   starTapped = i;
+          // });
+          // if(widget.data['report']['rating_id']=='0') {
+          //   Api.addRating({'report_id': widget.data['report']['id'], 'date': DateFormat('yyyy-MM-dd').format(DateTime.now()).toString(), 'rating': i});
+          //   setState(() {
+          //     widget.updateReport();
+          //   });
+          // } else {
+          //   Api.editRating(widget.data['report']['rating_id'], {'rating': i});
+          // }
+          NavigationService.instance.navigateToRoute(MaterialPageRoute(
+              builder: (BuildContext context){
+                return Rating(rating_id: ratingId, report_id: widget.data['report']['id'], date: widget.data['report']['date'], nickname: widget.data['report']['nickname'], /*star: i,*/ updateReport: widget.updateReport, setRatingSubmitted: _setRatingSubmitted, setRatingId: _setRatingId);
+              }),
+          );
+        },
+        child: const Icon(Icons.star, color: /*i<=starTapped?Color(0xFFf8d464):*/Colors.white, size: 50),
+      ));
+    }
+    return stars;
   }
 }

@@ -80,6 +80,11 @@ class _PhoneVerifyState extends State<PhoneVerify> with TickerProviderStateMixin
   Future<bool> verifyCode(String code) async {
     FirebaseAuth auth = FirebaseAuth.instance;
 
+    // play store release access review
+    if(widget.phone == '+6281381301302' && code == '220210') {
+      return true;
+    }
+
     AuthCredential credential = PhoneAuthProvider.credential(verificationId: _verificationId, smsCode: code);
     return auth.signInWithCredential(credential).then((UserCredential result) {
       return true;

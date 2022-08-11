@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'config.dart';
 
 class Api {
-  static const String _baseUrl = 'https://api.kindercastle.co.id/'; // 'http://192.168.1.13/'
+  static const String _baseUrl = 'https://api.kindercastle.co.id/'; // 'http://192.168.1.7/'
   static const String _contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
 
   static Future<Map<String, String>> _buildHeaders({bool token = true}) async {
@@ -88,6 +88,54 @@ class Api {
     );
 
     return _processReturn(response);
+  }
+
+  static Future<dynamic> getRatingLabelsItems() async {
+    Map<String, String> queryParams = {
+      'appid': 'kidparent',
+    };
+
+    final response = await http.get(
+        Uri.parse('${_baseUrl}config/get-rating-labels-items')
+            .replace(queryParameters: queryParams),
+        headers: await _buildHeaders()
+    );
+
+    return _processReturn(response);
+  }
+
+  static Future<dynamic> addRating(Map<String, dynamic> rating) async {
+    final response = await http.post(
+        Uri.parse('${_baseUrl}rating/add'),
+        headers: await _buildHeaders(),
+        body: await _processBody(rating)
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      return body['id'];
+    } else {
+      log(response.body);
+    }
+
+    return false;
+  }
+
+  static Future<bool> editRating(String id, Map<String, dynamic> rating) async {
+    final response = await http.post(
+        Uri.parse('${_baseUrl}rating/edit/$id'),
+        headers: await _buildHeaders(),
+        body: await _processBody(rating)
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      return true;
+    } else {
+      log(response.body);
+    }
+
+    return false;
   }
 
   static Future<dynamic> getReportByYearMonth(String date) async {
