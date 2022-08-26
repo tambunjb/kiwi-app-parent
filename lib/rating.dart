@@ -4,6 +4,7 @@ import 'package:intl/intl.dart' show DateFormat, toBeginningOfSentenceCase;
 import 'package:flutter/material.dart';
 
 import 'api.dart';
+import 'config.dart';
 import 'navigationService.dart';
 
 
@@ -48,6 +49,11 @@ class _RatingState extends State<Rating> {
   }
 
   Widget formRating(BuildContext context, Map data) {
+    if(!isSubmit && starForm==0) {
+      Config().eventRatingOverview(widget.report_id);
+    }
+
+
     return isSubmit?
 
     // rating thanks
@@ -107,7 +113,7 @@ class _RatingState extends State<Rating> {
         ]
     )) : (starForm==0 ?
 
-    // rating stars
+    // rating overview
     Container(
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         child: Column(
@@ -119,7 +125,7 @@ class _RatingState extends State<Rating> {
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: getStars()
+              children: getStars(70)
             ),
             const SizedBox(height: 30),
             Flexible(
@@ -144,10 +150,10 @@ class _RatingState extends State<Rating> {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    for(int i=1;i<=5;i++)
-                      Icon(i<=starForm?Icons.star:Icons.star_border, color: const Color(0xFFf8d464), size: 50)
-                  ]
+                  children: getStars(50) //[
+                  //   for(int i=1;i<=5;i++)
+                  //     Icon(i<=starForm?Icons.star:Icons.star_border, color: const Color(0xFFf8d464), size: 50)
+                  // ]
                 )
               ]
             ),
@@ -247,7 +253,7 @@ class _RatingState extends State<Rating> {
     )]));
   }
 
-  List<Widget> getStars() {
+  List<Widget> getStars(double size) {
     List<Widget> stars = [];
     for(int i=1;i<=5;i++) {
       stars.add(GestureDetector(
@@ -267,7 +273,7 @@ class _RatingState extends State<Rating> {
             Api.editRating(ratingId, {'rating': i});
           }
         },
-        child: Icon(i<=starForm?Icons.star:Icons.star_outline, color: const Color(0xFFf8d464), size: 70),
+        child: Icon(i<=starForm?Icons.star:Icons.star_outline, color: const Color(0xFFf8d464), size: size)
       ));
     }
     return stars;

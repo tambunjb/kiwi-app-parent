@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'config.dart';
 
 class Api {
-  static const String _baseUrl = 'https://api.kindercastle.co.id/'; // 'http://192.168.1.7/'
+  static const String _baseUrl = 'https://api.kindercastle.co.id/'; // 'http://192.168.1.12/'
   static const String _contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
 
   static Future<Map<String, String>> _buildHeaders({bool token = true}) async {

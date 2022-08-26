@@ -322,14 +322,31 @@ class _ReportDetailState extends State<ReportDetail> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () {
+          if(widget.data['report']['is_submit_rating']=='1' || isSubmit) {
+            return Future.value(true);
+          }
+          NavigationService.instance.navigateToRoute(MaterialPageRoute(
+              builder: (BuildContext context){
+                return Rating(rating_id: ratingId, report_id: widget.data['report']['id'], date: widget.data['report']['date'], nickname: widget.data['report']['nickname'], updateReport: widget.updateReport, setRatingSubmitted: _setRatingSubmitted, setRatingId: _setRatingId);
+              }),
+          );
+          return Future.value(false);
+        },
+        child: Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
               elevation: 0.0,
               leading: GestureDetector(
                   onTap: () {
-                    NavigationService.instance.goBack();
+                    (widget.data['report']['is_submit_rating']=='1' || isSubmit) ? NavigationService.instance.goBack() :
+                    NavigationService.instance.navigateToRoute(MaterialPageRoute(
+                        builder: (BuildContext context){
+                          return Rating(rating_id: ratingId, report_id: widget.data['report']['id'], date: widget.data['report']['date'], nickname: widget.data['report']['nickname'], updateReport: widget.updateReport, setRatingSubmitted: _setRatingSubmitted, setRatingId: _setRatingId);
+                        }),
+                    );
                   },
                   child: const Icon(Icons.arrow_back)
               ),
@@ -487,7 +504,7 @@ class _ReportDetailState extends State<ReportDetail> {
                   )
                 ]
             )
-        );
+        ));
   }
 
   List<Widget> getStars() {

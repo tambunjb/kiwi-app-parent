@@ -30,6 +30,7 @@ class Config {
   final String _eventDetail = 'rdp.load';
   final String _eventNotifNew = 'pnbnr.click';
   final String _eventNotifUpdate = 'pnur.click';
+  final String _eventRatingOverview = 'rrop.load';
 
 
   // Future<SharedPreferences> getPref() async {
@@ -193,6 +194,9 @@ class Config {
   }
   void eventNotifUpdate(String reportId) {
     logEvent(_eventNotifUpdate, eventProperties: {'report_id': reportId});
+  }
+  void eventRatingOverview(String reportId) {
+    logEvent(_eventRatingOverview, eventProperties: {'report_id': reportId});
   }
 
   Future<void> logEvent(String event, {Map<String, dynamic> eventProperties = const {}}) async {
