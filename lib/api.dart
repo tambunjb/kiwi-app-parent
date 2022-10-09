@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'config.dart';
 
 class Api {
-  static const String _baseUrl = 'https://api.kindercastle.co.id/'; // 'http://192.168.1.12/'
+  static const String _baseUrl = 'https://api.kindercastle.co.id/'; // 'http://192.168.1.3/'
   static const String _contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
 
   static Future<Map<String, String>> _buildHeaders({bool token = true}) async {
@@ -14,7 +14,7 @@ class Api {
       'Content-Type': _contentType,
     };
     if(token){
-      headers.addAll({'Authorization': 'Bearer ' + await Config().getToken()});
+      headers.addAll({'Authorization': 'Bearer ${await Config().getToken()}'});
     }
 
     return headers;
@@ -54,6 +54,23 @@ class Api {
     }
 
     return Future.value(false);
+  }
+
+  static Future<bool> addLogConfig({required String name, required String value, String desc = ''}) async {
+    final response = await http.post(
+        Uri.parse('${_baseUrl}config/add-log'),
+        headers: await _buildHeaders(token: false),
+        body: await _processBody({ 'name': name, 'value': value, 'desc': desc })
+    );
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+      return true;
+    } else {
+      log(response.body);
+    }
+
+    return false;
   }
 
   static Future<bool> addConfig({required String name, required String value, String desc = ''}) async {

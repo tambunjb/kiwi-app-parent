@@ -4,7 +4,6 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter/material.dart';
 import 'package:kiwi_app_parent/reportPdfPreview.dart';
 
-import 'api.dart';
 import 'config.dart';
 import 'navigationService.dart';
 import 'detailCard.dart';
@@ -14,13 +13,14 @@ import 'rating.dart';
 class ReportDetail extends StatefulWidget{
   final dynamic data;
   dynamic milks;
+  dynamic naps;
   dynamic rating;
   List<String> thingsList;
   List<String> mealsList;
   List<String> napList;
   Function updateReport;
 
-  ReportDetail({Key? key, required this.data, required this.milks, required this.rating, required this.thingsList, required this.mealsList, required this.napList, required this.updateReport}) : super(key: key) {
+  ReportDetail({Key? key, required this.data, required this.milks, required this.naps, required this.rating, required this.thingsList, required this.mealsList, required this.napList, required this.updateReport}) : super(key: key) {
     if(milks != null && milks.runtimeType == String) {
       milks = milks.replaceAll('null', '||||');
       milks = milks.replaceAll('{', '{"');
@@ -39,6 +39,31 @@ class ReportDetail extends StatefulWidget{
         // time remove second
         if(milks[i]['time']!=null) {
           milks[i]['time'] = '${milks[i]['time'].toString().split(':')[0]}:${milks[i]['time'].toString().split(':')[1]}';
+        }
+      }
+    }
+
+    if(naps != null && naps.runtimeType == String) {
+      naps = naps.replaceAll('null', '||||');
+      naps = naps.replaceAll('{', '{"');
+      naps = naps.replaceAll(': ', '": "');
+      naps = naps.replaceAll(', ', '", "');
+      naps = naps.replaceAll('}', '"}');
+      naps = naps.replaceAll('}",', '},');
+      naps = naps.replaceAll(', "{', ', {');
+      naps = naps.replaceAll('"||||"', 'null');
+      naps = jsonDecode(naps);
+
+      naps.sort((a, b) => a['start'].toString().compareTo(b['start'].toString()));
+
+      for(int i=0;i<naps.length;i++) {
+        naps[i].removeWhere((key, value) => value == null);
+        // time remove second
+        if(naps[i]['start']!=null) {
+          naps[i]['start'] = '${naps[i]['start'].toString().split(':')[0]}:${naps[i]['start'].toString().split(':')[1]}';
+        }
+        if(naps[i]['end']!=null) {
+          naps[i]['end'] = '${naps[i]['end'].toString().split(':')[0]}:${naps[i]['end'].toString().split(':')[1]}';
         }
       }
     }
@@ -94,7 +119,7 @@ class _ReportDetailState extends State<ReportDetail> {
 
   List<Widget> listThings() {
     final items = <Widget>[];
-    final things = widget.data['report']['things_tobring_tmr'].toString().split(',');
+    final things = (widget.data['report']['things_tobring_tmr']!=null && widget.data['report']['things_tobring_tmr'].trim()!='')?widget.data['report']['things_tobring_tmr'].toString().split(','):[];
     things.sort((a, b) {
       return a.toLowerCase().compareTo(b.toLowerCase());
     });
@@ -253,62 +278,111 @@ class _ReportDetailState extends State<ReportDetail> {
     return items;
   }
 
-  List<Widget> napProcess() {
+  List<Widget> napsProcess() {
     List<Widget> items = [];
-    for(int i=0;i<widget.napList.length;i++) {
-      if(!(textProcess(widget.data['report']['${widget.napList[i]}_start'])=='' && textProcess(widget.data['report']['${widget.napList[i]}_end'])=='')) {
-        if(items.isNotEmpty) {
-          items.add(
-              const Divider(
-                  color: Colors.black12
-              )
-          );
-        }
+    for(int i=0;i<widget.naps.length;i++) {
+      if(items.isNotEmpty) {
         items.add(
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                    margin: const EdgeInsets.only(bottom: 5),
-                    child: Row(children: [Flexible(
-                        child: Text(
-                            '${textProcess(widget.data['report']['${widget
-                                .napList[i]}_start']) != ''
-                                ?
-                            ('${widget.data['report']['${widget
-                                .napList[i]}_start'].toString().split(
-                                ':')[0]}:${widget.data['report']['${widget
-                                .napList[i]}_start'].toString().split(':')[1]}')
-                                : ''} - ${textProcess(
-                                widget.data['report']['${widget
-                                    .napList[i]}_end']) != ''
-                                ?
-                            ('${widget.data['report']['${widget
-                                .napList[i]}_end'].toString().split(
-                                ':')[0]}:${widget.data['report']['${widget
-                                .napList[i]}_end'].toString().split(':')[1]}')
-                                : ''}'
-                            , style: const TextStyle(fontSize: 16))
-                    )
-                    ])
-                ),
-                textProcess(widget.data['report']['${widget.napList[i]}_notes'])==''?Container():Container(
-                    margin: const EdgeInsets.only(bottom: 1),
-                    child: Row(children: [Flexible(
-                        child: Text(textProcess(
-                            widget.data['report']['${widget.napList[i]}_notes'],
-                            isBeginUpper: true),
-                            style: const TextStyle(fontSize: 16))
-                    )
-                    ])
-                )
-              ],
+            const Divider(
+                color: Colors.black12
             )
         );
       }
+      items.add(
+          Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                              margin: const EdgeInsets.only(bottom: 5),
+                              child: Row(children: [Flexible(
+                                  child: Text(
+                                      '${textProcess(widget.naps[i]['start']) != ''
+                                          ?
+                                      ('${widget.naps[i]['start'].toString().split(
+                                          ':')[0]}:${widget.naps[i]['start'].toString().split(':')[1]}')
+                                          : ''} - ${textProcess(
+                                          widget.naps[i]['end']) != ''
+                                          ?
+                                      ('${widget.naps[i]['end'].toString().split(
+                                          ':')[0]}:${widget.naps[i]['end'].toString().split(':')[1]}')
+                                          : ''}'
+                                      , style: const TextStyle(fontSize: 16))
+                              )
+                              ])
+                          ),
+                          textProcess(widget.naps[i]['notes'])==''?Container():Container(
+                              margin: const EdgeInsets.only(bottom: 1),
+                              child: Row(children: [Flexible(
+                                  child: Text(textProcess(
+                                      widget.naps[i]['notes'],
+                                      isBeginUpper: true),
+                                      style: const TextStyle(fontSize: 16))
+                              )
+                              ])
+                          )
+                        ],
+                      )
+      );
     }
     return items;
   }
+
+  // List<Widget> napProcess() {
+  //   List<Widget> items = [];
+  //   for(int i=0;i<widget.napList.length;i++) {
+  //     if(!(textProcess(widget.data['report']['${widget.napList[i]}_start'])=='' && textProcess(widget.data['report']['${widget.napList[i]}_end'])=='')) {
+  //       if(items.isNotEmpty) {
+  //         items.add(
+  //             const Divider(
+  //                 color: Colors.black12
+  //             )
+  //         );
+  //       }
+  //       items.add(
+  //           Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Container(
+  //                   margin: const EdgeInsets.only(bottom: 5),
+  //                   child: Row(children: [Flexible(
+  //                       child: Text(
+  //                           '${textProcess(widget.data['report']['${widget
+  //                               .napList[i]}_start']) != ''
+  //                               ?
+  //                           ('${widget.data['report']['${widget
+  //                               .napList[i]}_start'].toString().split(
+  //                               ':')[0]}:${widget.data['report']['${widget
+  //                               .napList[i]}_start'].toString().split(':')[1]}')
+  //                               : ''} - ${textProcess(
+  //                               widget.data['report']['${widget
+  //                                   .napList[i]}_end']) != ''
+  //                               ?
+  //                           ('${widget.data['report']['${widget
+  //                               .napList[i]}_end'].toString().split(
+  //                               ':')[0]}:${widget.data['report']['${widget
+  //                               .napList[i]}_end'].toString().split(':')[1]}')
+  //                               : ''}'
+  //                           , style: const TextStyle(fontSize: 16))
+  //                   )
+  //                   ])
+  //               ),
+  //               textProcess(widget.data['report']['${widget.napList[i]}_notes'])==''?Container():Container(
+  //                   margin: const EdgeInsets.only(bottom: 1),
+  //                   child: Row(children: [Flexible(
+  //                       child: Text(textProcess(
+  //                           widget.data['report']['${widget.napList[i]}_notes'],
+  //                           isBeginUpper: true),
+  //                           style: const TextStyle(fontSize: 16))
+  //                   )
+  //                   ])
+  //               )
+  //             ],
+  //           )
+  //       );
+  //     }
+  //   }
+  //   return items;
+  // }
 
   String getVolumeMilk() {
     double totalVolume = 0;
@@ -360,7 +434,7 @@ class _ReportDetailState extends State<ReportDetail> {
                     onTap: () {
                       NavigationService.instance.navigateToRoute(MaterialPageRoute(
                           builder: (BuildContext context){
-                            return ReportPdfPreview(data: widget.data, milks: widget.milks, thingsList: widget.thingsList, mealsList: widget.mealsList, napList: widget.napList);
+                            return ReportPdfPreview(data: widget.data, milks: widget.milks, naps: widget.naps, thingsList: widget.thingsList, mealsList: widget.mealsList, napList: widget.napList);
                           }
                       ));
                       // reportPdf(context, _data, _milks, _setData, _formSubmit, widget.isToday);
@@ -442,7 +516,7 @@ class _ReportDetailState extends State<ReportDetail> {
                   DetailCard(title:"Nap times", leadIcon: const Icon(Icons.airline_seat_individual_suite, size: 30),
                       content: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: napProcess()
+                          children: napsProcess()
                       )
                   ),
                   DetailCard(title:"Potty", leadIcon: const Icon(Icons.wash, size: 30),

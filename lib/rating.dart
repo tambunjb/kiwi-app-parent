@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:intl/intl.dart' show DateFormat, toBeginningOfSentenceCase;
 
 import 'package:flutter/material.dart';
@@ -125,7 +124,7 @@ class _RatingState extends State<Rating> {
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: getStars(70)
+              children: getStars(65)
             ),
             const SizedBox(height: 30),
             Flexible(
@@ -163,7 +162,9 @@ class _RatingState extends State<Rating> {
               child: Text('Apakah alasan utama Anda dalam memberikan rating di atas? (Boleh pilih lebih dari satu)', style: TextStyle(color: Colors.grey))
             ),
             const SizedBox(height: 25),
-            Flexible(
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [Flexible(
               child: Wrap(
                   alignment: WrapAlignment.center,
                   runSpacing: 10,
@@ -194,7 +195,7 @@ class _RatingState extends State<Rating> {
                       )
                   ]
               ),
-            ),
+            )]),
             const SizedBox(height: 15),
             TextField(
               keyboardType: TextInputType.multiline,

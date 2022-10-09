@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -132,6 +132,7 @@ class _PhoneVerifyState extends State<PhoneVerify> with TickerProviderStateMixin
             _hasError = true;
             _errorText = authException.message!;
           });
+          logErrApi(_errorText, authException.stackTrace);
         },
         codeSent: (String verificationId, [int? forceResendingToken]){
           // log("send auth codeSent verificationId ====== $verificationId");
@@ -148,8 +149,33 @@ class _PhoneVerifyState extends State<PhoneVerify> with TickerProviderStateMixin
 
   Future<void> logErrApi(var e, var stacktrace) async {
     final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-    Map desc = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
-    Api.addConfig(name: 'log_kidparent_otpconfirm_${(desc['model'].toString()+desc['board'].toString()).replaceAll(RegExp(r"\s+"), "")}_${DateTime.now().millisecondsSinceEpoch}', value: "$e\n$stacktrace", desc: desc.toString()).toString();
+    Map desc = Platform.isIOS ? _readIosBuildData(await deviceInfoPlugin.iosInfo) :
+        _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
+    Api.addLogConfig(
+        name: 'log_kidparent_otpconfirm_${(desc['model'].toString() +
+            (Platform.isIOS?desc['name'].toString():desc['board'].toString())).replaceAll(
+            RegExp(r"\s+"), "")}_${DateTime
+            .now()
+            .millisecondsSinceEpoch}',
+        value: "$e\n$stacktrace",
+        desc: desc.toString());
+  }
+
+  Map<String, dynamic> _readIosBuildData(IosDeviceInfo build) {
+    return <String, dynamic>{
+      'name': build.name,
+      'model': build.model,
+      'isPhysicalDevice': build.isPhysicalDevice,
+      'identifierForVendor': build.identifierForVendor,
+      'localizedModel': build.localizedModel,
+      'systemName': build.systemName,
+      'systemVersion': build.systemVersion,
+      'utsname.machine': build.utsname.machine,
+      'utsname.nodename': build.utsname.nodename,
+      'utsname.release': build.utsname.release,
+      'utsname.sysname': build.utsname.sysname,
+      'utsname.version': build.utsname.version
+    };
   }
 
   Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
@@ -290,7 +316,7 @@ class _PhoneVerifyState extends State<PhoneVerify> with TickerProviderStateMixin
                                     )
                                   ),
                                   Container(
-                                    width: MediaQuery.of(context).size.width / 10,
+                                    //width: 50,//MediaQuery.of(context).size.width / 10,
                                     alignment: Alignment.centerRight,
                                     child: Countdown(
                                         animation: StepTween(

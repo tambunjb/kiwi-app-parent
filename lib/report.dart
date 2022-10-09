@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:month_year_picker/month_year_picker.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:launch_review/launch_review.dart';
 import 'package:intl/intl.dart';
@@ -138,7 +139,7 @@ class _ReportState extends State<Report> with WidgetsBindingObserver {
     if(index != -1) {
       NavigationService.instance.navigateToRoute(MaterialPageRoute(
           builder: (BuildContext context){
-            return ReportDetail(data: _d[index], milks: _d[index]['report']['milk_sessions'], rating: _d[index]['report']['ratings'], thingsList: listThings, mealsList: listMeals, napList: listNap, updateReport: _updateReport);
+            return ReportDetail(data: _d[index], milks: _d[index]['report']['milk_sessions'], naps: _d[index]['report']['nap_times'], rating: _d[index]['report']['ratings'], thingsList: listThings, mealsList: listMeals, napList: listNap, updateReport: _updateReport);
           })
       );
     }
@@ -159,7 +160,7 @@ class _ReportState extends State<Report> with WidgetsBindingObserver {
 
   Future<void> _checkVersionUpdate() async {
     final needUpdate = await Api.getVersionUpdate();
-    if(needUpdate!=null && needUpdate.isNotEmpty && (needUpdate['forced'].toString()=='1' || needUpdate['recommend'].toString()=='1')) {
+    if(needUpdate!=null && needUpdate is Map && needUpdate.isNotEmpty && (needUpdate['forced'].toString()=='1' || needUpdate['recommend'].toString()=='1')) {
       _showAppUpdateModalDialog(context, needUpdate);
     }
   }
@@ -403,7 +404,7 @@ class _ReportState extends State<Report> with WidgetsBindingObserver {
                           onTap: () {
                             NavigationService.instance.navigateToRoute(MaterialPageRoute(
                                 builder: (BuildContext context){
-                                  return ReportDetail(data: data[index], milks: data[index]['report']['milk_sessions'], rating: data[index]['report']['ratings'], thingsList: listThings, mealsList: listMeals, napList: listNap, updateReport: _updateReport);
+                                  return ReportDetail(data: data[index], milks: data[index]['report']['milk_sessions'], naps: data[index]['report']['nap_times'], rating: data[index]['report']['ratings'], thingsList: listThings, mealsList: listMeals, napList: listNap, updateReport: _updateReport);
                                 }
                             ));
                           },
@@ -433,13 +434,21 @@ class _ReportState extends State<Report> with WidgetsBindingObserver {
 
   Future<void> _showPicker({required BuildContext context, String? locale}) async {
     final localeObj = locale != null ? Locale(locale) : null;
-    final selected = await showMonthYearPicker(
-      context: context,
-      initialDate: DateTime.parse('$date-01'),
-      firstDate: DateTime(2022),
-      lastDate: DateTime.now(),
-      locale: localeObj
-    );
+    final selected = Platform.isIOS ?
+      await showMonthPicker(
+        context: context,
+        initialDate: DateTime.parse('$date-01'),
+        firstDate: DateTime(2022),
+        lastDate: DateTime.now(),
+        locale: localeObj
+      )
+      : await showMonthYearPicker(
+        context: context,
+        initialDate: DateTime.parse('$date-01'),
+        firstDate: DateTime(2022),
+        lastDate: DateTime.now(),
+        locale: localeObj
+      );
 
     if (selected != null) {
       setState(() {

@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kiwi_app_parent/reportPdf.dart';
 import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:printing/printing.dart';
@@ -17,11 +18,12 @@ import 'package:intl/intl.dart';
 class ReportPdfPreview extends StatelessWidget {
   final dynamic data;
   dynamic milks;
+  dynamic naps;
   List<String> thingsList;
   List<String> mealsList;
   List<String> napList;
 
-  ReportPdfPreview({Key? key, required this.data, required this.milks, required this.thingsList, required this.mealsList, required this.napList}) : super(key: key) {
+  ReportPdfPreview({Key? key, required this.data, required this.milks, required this.naps, required this.thingsList, required this.mealsList, required this.napList}) : super(key: key) {
     if(milks != null && milks.runtimeType == String) {
       milks = milks.replaceAll('null', '||||');
       milks = milks.replaceAll('{', '{"');
@@ -43,12 +45,37 @@ class ReportPdfPreview extends StatelessWidget {
         }
       }
     }
+
+    if(naps != null && naps.runtimeType == String) {
+      naps = naps.replaceAll('null', '||||');
+      naps = naps.replaceAll('{', '{"');
+      naps = naps.replaceAll(': ', '": "');
+      naps = naps.replaceAll(', ', '", "');
+      naps = naps.replaceAll('}', '"}');
+      naps = naps.replaceAll('}",', '},');
+      naps = naps.replaceAll(', "{', ', {');
+      naps = naps.replaceAll('"||||"', 'null');
+      naps = jsonDecode(naps);
+
+      naps.sort((a, b) => a['start'].toString().compareTo(b['start'].toString()));
+
+      for(int i=0;i<naps.length;i++) {
+        naps[i].removeWhere((key, value) => value == null);
+        // time remove second
+        if(naps[i]['start']!=null) {
+          naps[i]['start'] = '${naps[i]['start'].toString().split(':')[0]}:${naps[i]['start'].toString().split(':')[1]}';
+        }
+        if(naps[i]['end']!=null) {
+          naps[i]['end'] = '${naps[i]['end'].toString().split(':')[0]}:${naps[i]['end'].toString().split(':')[1]}';
+        }
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     String filename = '${data['child_name'].toString().replaceAll(RegExp(r"\s+"), "")}_${DateFormat('ddMMyyyy').format(DateTime.parse(data['report']['date'].toString().split('.')[0]))}_report.pdf';
-    var fileBytes = reportPdf(context, data, milks);
+    var fileBytes = reportPdf(context, data, milks, naps);
     return Scaffold(
       appBar: AppBar(
         title: const Text('PDF Preview'),
@@ -67,7 +94,9 @@ class ReportPdfPreview extends StatelessWidget {
                 if(!status.isGranted) {
                   await Permission.storage.request();
                 }
-                final String dir = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                final String dir = Platform.isIOS
+                    ? (await getApplicationDocumentsDirectory()).toString()
+                    : await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                 String path = '$dir/$filename';
                 if(await File(path).exists()) {
                   path = '$dir/${data['child_name'].toString().replaceAll(RegExp(r"\s+"), "")}_${DateFormat('ddMMyyyy').format(DateTime.parse(data['report']['date'].toString().split('.')[0]))}_${DateFormat('His').format(DateTime.now())}_report.pdf';

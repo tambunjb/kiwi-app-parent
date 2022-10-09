@@ -145,8 +145,8 @@ class _LoginState extends State<Login>{
                                     padding: const EdgeInsets.all(16),
                                     child:
                                     _loginClicked ? const SizedBox(
-                                      height: 21.0,
-                                      width: 21.0,
+                                      height: 19.0,
+                                      width: 19.0,
                                       child: CircularProgressIndicator(color: Colors.white),
                                     )
                                     :
