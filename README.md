@@ -1,3 +1,9 @@
+# <span id="tjidtitle">Daycare App for Parent</span>
+
+<div>Technologies: <span id="tjidtechs">Flutter, Firebase, iOS</span></div>
+<br />
+
+
 # kiwi_app_parent
 
 A KIWI-DayCare mobile app for parent
