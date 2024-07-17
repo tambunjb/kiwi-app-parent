@@ -1,6 +1,6 @@
 # <span id="tjidtitle">Daycare App for Parent</span>
 
-<div>Technologies: <span id="tjidtechs">Flutter, Firebase, iOS</span></div>
+<div>Technologies: <span id="tjidtechs">Flutter, Firebase, iOS, Dart</span></div>
 <br />
 
 
